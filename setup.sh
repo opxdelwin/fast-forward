@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Store the script directory early to ensure we can reference it after changing directories
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Set the target directory one level up from the script directory
+TARGET_DIR="$(dirname "$SCRIPT_DIR")"
+
 # Early check for /var/log/auth.log file
 echo "===== [1/11] Checking auth.log ====="
 if [ -f /var/log/auth.log ]; then
@@ -16,7 +22,7 @@ MISSING_ENV_FILES=false
 ENV_FILES=("stable-api.env" "canary-api.env" "faiss.env" "proxy.env")
 
 for env_file in "${ENV_FILES[@]}"; do
-  if [ ! -f "$env_file" ]; then
+  if [ ! -f "$SCRIPT_DIR/$env_file" ]; then
     echo ">>> Missing required environment file: $env_file"
     MISSING_ENV_FILES=true
   else
@@ -28,9 +34,6 @@ if [ "$MISSING_ENV_FILES" = true ]; then
   echo "Error: Required environment files are missing. Setup cannot continue."
   exit 1
 fi
-
-# Store the script directory early to ensure we can reference it after changing directories
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo "===== [3/11] Updating system ====="
 apt update && apt upgrade -y
@@ -51,97 +54,96 @@ else
 fi
 
 echo "===== [7/11] Cloning repositories ====="
-# Clone repositories into home directory with custom directory names
-cd ~
-HOME_DIR=$(pwd)
-echo ">>> Home directory: $HOME_DIR"
+# Clone repositories into the parent directory of the script
+cd "$TARGET_DIR"
+echo ">>> Target directory: $TARGET_DIR"
 
 # Clone traefik-proxy
-if [ ! -d "$HOME_DIR/traefik-proxy" ]; then
+if [ ! -d "$TARGET_DIR/traefik-proxy" ]; then
   echo ">>> Cloning traefik-proxy"
-  gh repo clone Vettam/traefik-proxy "$HOME_DIR/traefik-proxy"
+  gh repo clone Vettam/traefik-proxy "$TARGET_DIR/traefik-proxy"
 else
-  echo ">>> traefik-proxy already cloned at $HOME_DIR/traefik-proxy"
+  echo ">>> traefik-proxy already cloned at $TARGET_DIR/traefik-proxy"
   # Verify directory actually exists
-  if [ ! -d "$HOME_DIR/traefik-proxy" ]; then
-    echo ">>> ERROR: Directory $HOME_DIR/traefik-proxy doesn't exist, recreating"
-    gh repo clone Vettam/traefik-proxy "$HOME_DIR/traefik-proxy"
+  if [ ! -d "$TARGET_DIR/traefik-proxy" ]; then
+    echo ">>> ERROR: Directory $TARGET_DIR/traefik-proxy doesn't exist, recreating"
+    gh repo clone Vettam/traefik-proxy "$TARGET_DIR/traefik-proxy"
   fi
 fi
 
 # Clone canary API Service
-if [ ! -d "$HOME_DIR/canary" ]; then
+if [ ! -d "$TARGET_DIR/canary" ]; then
   echo ">>> Cloning Vettam_backend into directory 'canary'"
-  gh repo clone Vettam/Vettam_backend "$HOME_DIR/canary"
+  gh repo clone Vettam/Vettam_backend "$TARGET_DIR/canary"
 else
-  echo ">>> 'canary' directory already exists at $HOME_DIR/canary"
+  echo ">>> 'canary' directory already exists at $TARGET_DIR/canary"
   # Verify directory actually exists
-  if [ ! -d "$HOME_DIR/canary" ]; then
-    echo ">>> ERROR: Directory $HOME_DIR/canary doesn't exist, recreating"
-    gh repo clone Vettam/Vettam_backend "$HOME_DIR/canary"
+  if [ ! -d "$TARGET_DIR/canary" ]; then
+    echo ">>> ERROR: Directory $TARGET_DIR/canary doesn't exist, recreating"
+    gh repo clone Vettam/Vettam_backend "$TARGET_DIR/canary"
   fi
 fi
 
 # Clone stable API Service
-if [ ! -d "$HOME_DIR/stable" ]; then
+if [ ! -d "$TARGET_DIR/stable" ]; then
   echo ">>> Cloning Vettam_backend into directory 'stable'"
-  gh repo clone Vettam/Vettam_backend "$HOME_DIR/stable"
+  gh repo clone Vettam/Vettam_backend "$TARGET_DIR/stable"
 else
-  echo ">>> 'stable' directory already exists at $HOME_DIR/stable"
+  echo ">>> 'stable' directory already exists at $TARGET_DIR/stable"
   # Verify directory actually exists
-  if [ ! -d "$HOME_DIR/stable" ]; then
-    echo ">>> ERROR: Directory $HOME_DIR/stable doesn't exist, recreating"
-    gh repo clone Vettam/Vettam_backend "$HOME_DIR/stable"
+  if [ ! -d "$TARGET_DIR/stable" ]; then
+    echo ">>> ERROR: Directory $TARGET_DIR/stable doesn't exist, recreating"
+    gh repo clone Vettam/Vettam_backend "$TARGET_DIR/stable"
   fi
 fi
 
 # Clone faiss-service
-if [ ! -d "$HOME_DIR/faiss-service" ]; then
+if [ ! -d "$TARGET_DIR/faiss-service" ]; then
   echo ">>> Cloning faiss-service"
-  gh repo clone Vettam/faiss-service "$HOME_DIR/faiss-service"
+  gh repo clone Vettam/faiss-service "$TARGET_DIR/faiss-service"
 else
-  echo ">>> faiss-service already cloned at $HOME_DIR/faiss-service"
+  echo ">>> faiss-service already cloned at $TARGET_DIR/faiss-service"
   # Verify directory actually exists
-  if [ ! -d "$HOME_DIR/faiss-service" ]; then
-    echo ">>> ERROR: Directory $HOME_DIR/faiss-service doesn't exist, recreating"
-    gh repo clone Vettam/faiss-service "$HOME_DIR/faiss-service"
+  if [ ! -d "$TARGET_DIR/faiss-service" ]; then
+    echo ">>> ERROR: Directory $TARGET_DIR/faiss-service doesn't exist, recreating"
+    gh repo clone Vettam/faiss-service "$TARGET_DIR/faiss-service"
   fi
 fi
 
 echo "===== [8/11] Copying environment files ====="
 # Copy stable-api.env to stable directory
-echo ">>> Copying stable-api.env to ~/stable/.env"
-cp "$SCRIPT_DIR/stable-api.env" ~/stable/.env
+echo ">>> Copying stable-api.env to $TARGET_DIR/stable/.env"
+cp "$SCRIPT_DIR/stable-api.env" "$TARGET_DIR/stable/.env"
 
 # Copy canary-api.env to canary directory
-echo ">>> Copying canary-api.env to ~/canary/.env"
-cp "$SCRIPT_DIR/canary-api.env" ~/canary/.env
+echo ">>> Copying canary-api.env to $TARGET_DIR/canary/.env"
+cp "$SCRIPT_DIR/canary-api.env" "$TARGET_DIR/canary/.env"
 
 # Copy faiss.env to faiss-service directory
-echo ">>> Copying faiss.env to ~/faiss-service/.env"
-cp "$SCRIPT_DIR/faiss.env" ~/faiss-service/.env
+echo ">>> Copying faiss.env to $TARGET_DIR/faiss-service/.env"
+cp "$SCRIPT_DIR/faiss.env" "$TARGET_DIR/faiss-service/.env"
 
 # Copy proxy.env to traefik-proxy directory
-echo ">>> Copying proxy.env to ~/traefik-proxy/.prod.env"
-cp "$SCRIPT_DIR/proxy.env" ~/traefik-proxy/.prod.env
+echo ">>> Copying proxy.env to $TARGET_DIR/traefik-proxy/.prod.env"
+cp "$SCRIPT_DIR/proxy.env" "$TARGET_DIR/traefik-proxy/.prod.env"
 
 echo "===== [9/11] Starting Reverse Proxy ====="
-# cd ~/traefik-proxy
+cd "$TARGET_DIR/traefik-proxy"
 # docker compose up -d
 
 echo "===== [10/11] Starting backend services ====="
-# cd ~/canary
+cd "$TARGET_DIR/canary"
 # git checkout canary
 # git pull origin canary
 # docker compose -f docker-compose.canary.yml up --build -d
 
-# cd ~/stable
+cd "$TARGET_DIR/stable"
 # git checkout stable
 # git pull origin stable
 # docker compose up --build -d
 
 echo "===== [11/11] Starting FAISS Service ====="
-# cd ~/faiss-service
+cd "$TARGET_DIR/faiss-service"
 # docker compose up --build -d
 
 echo "===== Setup complete! Stack is running. ====="
