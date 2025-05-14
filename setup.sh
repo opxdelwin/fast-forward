@@ -29,6 +29,9 @@ if [ "$MISSING_ENV_FILES" = true ]; then
   exit 1
 fi
 
+# Store the script directory early to ensure we can reference it after changing directories
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 echo "===== [3/11] Updating system ====="
 apt update && apt upgrade -y
 
@@ -36,7 +39,7 @@ echo "===== [4/11] Installing dependencies ====="
 apt install -y curl git sudo gh
 
 echo "===== [5/11] Installing Docker ====="
-sudo bash docker.sh
+sudo bash "$SCRIPT_DIR/docker.sh"
 
 echo "===== [6/11] Authenticating GitHub CLI ====="
 if ! gh auth status &>/dev/null; then
@@ -84,9 +87,6 @@ else
 fi
 
 echo "===== [8/11] Copying environment files ====="
-# Store the current script directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 # Copy stable-api.env to stable directory
 echo ">>> Copying stable-api.env to ~/stable/.env"
 cp "$SCRIPT_DIR/stable-api.env" ~/stable/.env
@@ -101,7 +101,7 @@ cp "$SCRIPT_DIR/faiss.env" ~/faiss-service/.env
 
 # Copy proxy.env to traefik-proxy directory
 echo ">>> Copying proxy.env to ~/traefik-proxy/.prod.env"
-cp "$SCRIPT_DIR/proxy.env" ~/faiss-service/.prod.env
+cp "$SCRIPT_DIR/proxy.env" ~/traefik-proxy/.prod.env"
 
 echo "===== [9/11] Starting Reverse Proxy ====="
 # cd ~/traefik-proxy
