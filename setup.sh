@@ -53,37 +53,59 @@ fi
 echo "===== [7/11] Cloning repositories ====="
 # Clone repositories into home directory with custom directory names
 cd ~
+HOME_DIR=$(pwd)
+echo ">>> Home directory: $HOME_DIR"
 
 # Clone traefik-proxy
-if [ ! -d "traefik-proxy" ]; then
+if [ ! -d "$HOME_DIR/traefik-proxy" ]; then
   echo ">>> Cloning traefik-proxy"
-  gh repo clone Vettam/traefik-proxy
+  gh repo clone Vettam/traefik-proxy "$HOME_DIR/traefik-proxy"
 else
-  echo ">>> traefik-proxy already cloned"
+  echo ">>> traefik-proxy already cloned at $HOME_DIR/traefik-proxy"
+  # Verify directory actually exists
+  if [ ! -d "$HOME_DIR/traefik-proxy" ]; then
+    echo ">>> ERROR: Directory $HOME_DIR/traefik-proxy doesn't exist, recreating"
+    gh repo clone Vettam/traefik-proxy "$HOME_DIR/traefik-proxy"
+  fi
 fi
 
 # Clone canary API Service
-if [ ! -d "canary" ]; then
+if [ ! -d "$HOME_DIR/canary" ]; then
   echo ">>> Cloning Vettam_backend into directory 'canary'"
-  gh repo clone Vettam/Vettam_backend canary
+  gh repo clone Vettam/Vettam_backend "$HOME_DIR/canary"
 else
-  echo ">>> 'canary' directory already exists"
+  echo ">>> 'canary' directory already exists at $HOME_DIR/canary"
+  # Verify directory actually exists
+  if [ ! -d "$HOME_DIR/canary" ]; then
+    echo ">>> ERROR: Directory $HOME_DIR/canary doesn't exist, recreating"
+    gh repo clone Vettam/Vettam_backend "$HOME_DIR/canary"
+  fi
 fi
 
 # Clone stable API Service
-if [ ! -d "stable" ]; then
+if [ ! -d "$HOME_DIR/stable" ]; then
   echo ">>> Cloning Vettam_backend into directory 'stable'"
-  gh repo clone Vettam/Vettam_backend stable
+  gh repo clone Vettam/Vettam_backend "$HOME_DIR/stable"
 else
-  echo ">>> 'stable' directory already exists"
+  echo ">>> 'stable' directory already exists at $HOME_DIR/stable"
+  # Verify directory actually exists
+  if [ ! -d "$HOME_DIR/stable" ]; then
+    echo ">>> ERROR: Directory $HOME_DIR/stable doesn't exist, recreating"
+    gh repo clone Vettam/Vettam_backend "$HOME_DIR/stable"
+  fi
 fi
 
 # Clone faiss-service
-if [ ! -d "faiss-service" ]; then
+if [ ! -d "$HOME_DIR/faiss-service" ]; then
   echo ">>> Cloning faiss-service"
-  gh repo clone Vettam/faiss-service
+  gh repo clone Vettam/faiss-service "$HOME_DIR/faiss-service"
 else
-  echo ">>> faiss-service already cloned"
+  echo ">>> faiss-service already cloned at $HOME_DIR/faiss-service"
+  # Verify directory actually exists
+  if [ ! -d "$HOME_DIR/faiss-service" ]; then
+    echo ">>> ERROR: Directory $HOME_DIR/faiss-service doesn't exist, recreating"
+    gh repo clone Vettam/faiss-service "$HOME_DIR/faiss-service"
+  fi
 fi
 
 echo "===== [8/11] Copying environment files ====="
