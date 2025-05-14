@@ -101,7 +101,7 @@ cp "$SCRIPT_DIR/faiss.env" ~/faiss-service/.env
 
 # Copy proxy.env to traefik-proxy directory
 echo ">>> Copying proxy.env to ~/traefik-proxy/.prod.env"
-cp "$SCRIPT_DIR/proxy.env" "~/traefik-proxy/.prod.env"
+cp "$SCRIPT_DIR/proxy.env" ~/traefik-proxy/.prod.env
 
 echo "===== [9/11] Starting Reverse Proxy ====="
 # cd ~/traefik-proxy
