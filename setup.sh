@@ -138,24 +138,24 @@ cp "$SCRIPT_DIR/proxy.env" "$TARGET_DIR/traefik-proxy/.prod.env"
 
 echo "\n\n===== [9/11] Starting Reverse Proxy =====\n"
 cd "$TARGET_DIR/traefik-proxy"
-# docker compose up -d
+docker compose up -d --build
 
 
 echo "\n\n===== [10/11] Starting backend services =====\n"
 cd "$TARGET_DIR/canary"
-# git checkout canary
-# git pull origin canary
-# docker compose -f docker-compose.canary.yml up --build -d
+git checkout canary
+git pull origin canary
+docker compose -f docker-compose.canary.yml up --build -d
 
 cd "$TARGET_DIR/stable"
-# git checkout stable
-# git pull origin stable
-# docker compose up --build -d
+git checkout stable
+git pull origin stable
+docker compose up --build -d
 
 
 echo "\n\n===== [11/11] Starting FAISS Service =====\n"
-# cd "$TARGET_DIR/faiss-service"
-# docker compose up --build -d
+cd "$TARGET_DIR/faiss-service"
+docker compose up --build -d
 
 
 echo "\n\n===== Setup complete! Stack is running. =====\n"
