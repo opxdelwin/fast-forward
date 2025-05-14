@@ -9,7 +9,9 @@ TARGET_DIR="$(dirname "$SCRIPT_DIR")"
 
 
 # Early check for /var/log/auth.log file
-echo "\n\n===== [1/11] Checking auth.log =====\n"
+echo
+echo
+echo "===== [1/12] Checking auth.log ====="
 if [ -f /var/log/auth.log ]; then
   echo ">>> /var/log/auth.log exists as a file. Continuing..."
 else
@@ -19,7 +21,9 @@ fi
 
 
 # Check for required environment files
-echo "\n\n===== [2/11] Checking for required environment files =====\n"
+echo
+echo
+echo "===== [2/12] Checking for required environment files ====="
 MISSING_ENV_FILES=false
 ENV_FILES=("stable-api.env" "canary-api.env" "faiss.env" "proxy.env")
 
@@ -38,19 +42,27 @@ if [ "$MISSING_ENV_FILES" = true ]; then
 fi
 
 
-echo "\n\n===== [3/11] Updating system =====\n"
+echo
+echo
+echo "===== [3/12] Updating system ====="
 apt update && apt upgrade -y
 
 
-echo "\n\n===== [4/11] Installing dependencies =====\n"
+echo
+echo
+echo "===== [4/12] Installing dependencies ====="
 apt install -y curl git sudo gh
 
 
-echo "\n\n===== [5/11] Installing Docker =====\n"
+echo
+echo
+echo "===== [5/12] Installing Docker ====="
 sudo bash "$SCRIPT_DIR/docker.sh"
 
 
-echo "\n\n===== [6/11] Authenticating GitHub CLI =====\n"
+echo
+echo
+echo "===== [6/12] Authenticating GitHub CLI ====="
 if ! gh auth status &>/dev/null; then
   echo ">>> GitHub authentication required"
   echo ">>> Opening browser for authentication..."
@@ -60,7 +72,9 @@ else
 fi
 
 
-echo "\n\n===== [7/11] Cloning repositories =====\n"
+echo
+echo
+echo "===== [7/12] Cloning repositories ====="
 # Clone repositories into the parent directory of the script
 cd "$TARGET_DIR"
 echo ">>> Target directory: $TARGET_DIR"
@@ -118,7 +132,9 @@ else
 fi
 
 
-echo "\n\n===== [8/11] Copying environment files =====\n"
+echo
+echo
+echo "===== [8/12] Copying environment files ====="
 # Copy stable-api.env to stable directory
 echo ">>> Copying stable-api.env to $TARGET_DIR/stable/.env"
 cp "$SCRIPT_DIR/stable-api.env" "$TARGET_DIR/stable/.env"
@@ -135,13 +151,22 @@ cp "$SCRIPT_DIR/faiss.env" "$TARGET_DIR/faiss-service/.env"
 echo ">>> Copying proxy.env to $TARGET_DIR/traefik-proxy/.prod.env"
 cp "$SCRIPT_DIR/proxy.env" "$TARGET_DIR/traefik-proxy/.prod.env"
 
+echo
+echo
+echo "===== [9/12] Setting up docker networks ====="
+docker network create shared-network
 
-echo "\n\n===== [9/11] Starting Reverse Proxy =====\n"
+
+echo
+echo
+echo "===== [10/12] Starting Reverse Proxy ====="
 cd "$TARGET_DIR/traefik-proxy"
 docker compose up -d --build
 
 
-echo "\n\n===== [10/11] Starting backend services =====\n"
+echo
+echo
+echo "===== [11/12] Starting backend services ====="
 cd "$TARGET_DIR/canary"
 git checkout canary
 git pull origin canary
@@ -153,9 +178,13 @@ git pull origin stable
 docker compose up --build -d
 
 
-echo "\n\n===== [11/11] Starting FAISS Service =====\n"
+echo
+echo
+echo "===== [12/12] Starting FAISS Service ====="
 cd "$TARGET_DIR/faiss-service"
 docker compose up --build -d
 
 
-echo "\n\n===== Setup complete! Stack is running. =====\n"
+echo
+echo
+echo "===== Setup complete! Stack is running. ====="
