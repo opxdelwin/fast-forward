@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-# Early check for /var/log/access.log file
-echo "===== [1/11] Checking access.log ====="
-if [ -f /var/log/access.log ]; then
-  echo ">>> /var/log/access.log exists as a file. Continuing..."
+# Early check for /var/log/auth.log file
+echo "===== [1/11] Checking auth.log ====="
+if [ -f /var/log/auth.log ]; then
+  echo ">>> /var/log/auth.log exists as a file. Continuing..."
 else
-    echo ">>> /var/log/access.log does not exist as a file. Exiting..."
+    echo ">>> /var/log/auth.log does not exist as a file. Exiting..."
     exit 1
 fi
 
