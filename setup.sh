@@ -188,3 +188,4 @@ docker compose up --build -d
 echo
 echo
 echo "===== Setup complete! Stack is running. ====="
+exho
