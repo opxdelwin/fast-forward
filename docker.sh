@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Get the actual user who invoked sudo (this works even when script is run with sudo)
+if [ -n "$SUDO_USER" ]; then
+  ACTUAL_USER="$SUDO_USER"
+else
+  ACTUAL_USER="$USER"
+fi
+
 # Remove conflicting packages:
 for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
 
@@ -23,7 +30,8 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
     docker-buildx-plugin docker-compose-plugin
 
 # Postinstall
-sudo usermod -aG docker $USER
+sudo usermod -aG docker "$ACTUAL_USER"
+
 echo ">>> Docker installed and user added to docker group. Please log out and back in for changes to take effect."
 echo ">>> Docker installation complete."
 echo 
